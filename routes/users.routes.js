@@ -6,13 +6,17 @@ const {
     getUsers,
     getUser,
     createUser,
+    updateUser,
+    deleteUser,
     login,
 } = require("../controllers/users.controller");
 const router = express.Router();
 
+router.post("/login", body("email").isEmail(), login);
+router.post("/", auth, isAdmin, body("email").isEmail(), createUser);
 router.get("/", auth, isAdmin, getUsers);
 router.get("/:id", auth, isAdmin, getUser);
-router.post("/", auth, isAdmin, createUser);
-router.post("/login", body("email").isEmail(), login);
+router.put("/:id", auth, isAdmin, body("email").optional().isEmail(), updateUser);
+router.delete("/:id", auth, isAdmin, deleteUser);
 
 module.exports = router;
