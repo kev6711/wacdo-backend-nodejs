@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const passwordValidator = require("password-validator");
 
 exports.getUsers = async (req, res) => {
     try {
@@ -37,6 +38,14 @@ exports.createUser = async (req, res) => {
         if (!email || !password)
             return res.status(400).json({ error: "Email et mot de passe obligatoire" });
 
+        const schema = new passwordValidator();
+        schema.is().min(8).has().uppercase().has().digits();
+        if (!schema.validate(password))
+            return res.status(400).json({
+                message:
+                    "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule et 1 chiffre",
+            });
+
         const existingUser = await User.findOne({ email });
         if (existingUser)
             return res.status(400).json({ message: "Compte déjà existant" });
@@ -71,9 +80,13 @@ exports.login = async (req, res) => {
         if (!isPasswordCorrect)
             return res.status(401).json({ message: "Identifiants invalides" });
 
-        const token = jwt.sign({ userId: existingUser._id }, "JWT_SECRET", {
-            expiresIn: "7d",
-        });
+        const token = jwt.sign(
+            { userId: existingUser._id, role: existingUser.role },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "7d",
+            },
+        );
         res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ error: "Erreur lors de la connexion" });
