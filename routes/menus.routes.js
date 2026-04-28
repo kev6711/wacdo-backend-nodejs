@@ -1,14 +1,14 @@
 const express = require("express");
 const auth = require("../middleware/auth");
-const isAdmin = require("../middleware/isAdmin");
+const authorizeRoles = require("../middleware/role");
 const upload = require("../middleware/multer");
 const { getMenus, getMenu, createMenu, updateMenu, deleteMenu } = require("../controllers/menus.controller");
 const router = express.Router();
 
-router.get("/", auth, isAdmin, getMenus);
-router.get("/:id", auth, isAdmin, getMenu);
-router.post("/", auth, isAdmin, upload.single("image"), createMenu);
-router.put("/:id", auth, isAdmin, upload.single("image"), updateMenu);
-router.delete("/:id", auth, isAdmin, deleteMenu);
+router.get("/", auth, authorizeRoles("admin"), getMenus);
+router.get("/:id", auth, authorizeRoles("admin"), getMenu);
+router.post("/", auth, authorizeRoles("admin"), upload.single("image"), createMenu);
+router.put("/:id", auth, authorizeRoles("admin"), upload.single("image"), updateMenu);
+router.delete("/:id", auth, authorizeRoles("admin"), deleteMenu);
 
 module.exports = router;
