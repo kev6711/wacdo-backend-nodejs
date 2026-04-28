@@ -1,5 +1,7 @@
 const Product = require("../models/product.model");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 exports.getProducts = async (req, res) => {
     try {
@@ -74,7 +76,18 @@ exports.updateProduct = async (req, res) => {
         }
         if (description !== undefined) product.description = description;
         if (category !== undefined) product.category = category;
-        if (image !== undefined) product.image = image;
+        if (image !== undefined) {
+            // Suppression de l'ancienne image dans le dossier uploads
+            if (product.image) {
+                const oldImagePath = path.join(__dirname, "../uploads", product.image);
+
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+
+            product.image = image;
+        }
         if (availability !== undefined) product.availability = availability;
         if (price !== undefined) product.price = price;
 
@@ -92,6 +105,15 @@ exports.deleteProduct = async (req, res) => {
 
         const product = await Product.findById(id);
         if (!product) return res.status(404).json({ error: "Produit introuvable" });
+
+        // Suppression du fichier image dans le dossier uploads
+        if (product.image) {
+            const imagePath = path.join(__dirname, "../uploads", product.image);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
 
         await product.deleteOne();
         res.status(200).json({ message: "Produit supprimé avec succès" });

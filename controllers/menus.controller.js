@@ -1,12 +1,12 @@
 const Menu = require("../models/menu.model");
 const Product = require("../models/product.model");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 exports.getMenus = async (req, res) => {
     try {
-        const menus = await Menu.find()
-            .populate("products", "name image availability price")
-            .sort({ createdAt: -1 });
+        const menus = await Menu.find().populate("products", "name image availability price").sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (error) {
         res.status(500).json({
@@ -90,8 +90,7 @@ exports.updateMenu = async (req, res) => {
                 });
             }
             for (const id of products) {
-                if (!mongoose.Types.ObjectId.isValid(id))
-                    return res.status(400).json({ error: "ID invalide" });
+                if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "ID invalide" });
 
                 const existingProduct = await Product.findById(id);
                 if (!existingProduct) return res.status(400).json({ error: "Produit introuvable" });
@@ -100,7 +99,18 @@ exports.updateMenu = async (req, res) => {
             menu.products = products;
         }
 
-        if (image !== undefined) menu.image = image;
+        if (image !== undefined) {
+            // Suppression de l'ancienne image dans le dossier uploads
+            if (menu.image) {
+                const oldImagePath = path.join(__dirname, "../uploads", menu.image);
+
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+
+            menu.image = image;
+        }
         if (availability !== undefined) menu.availability = availability;
         if (price !== undefined) menu.price = price;
 
@@ -118,6 +128,15 @@ exports.deleteMenu = async (req, res) => {
 
         const menu = await Menu.findById(id);
         if (!menu) return res.status(404).json({ error: "Menu introuvable" });
+
+        // Suppression du fichier image dans le dossier uploads
+        if (menu.image) {
+            const imagePath = path.join(__dirname, "../uploads", menu.image);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
 
         await menu.deleteOne();
         res.status(200).json({ message: "Menu supprimé avec succès" });
