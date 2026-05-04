@@ -14,6 +14,23 @@ exports.getProducts = async (req, res) => {
     }
 };
 
+exports.getProductsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        const products = await Product.find({ category }).sort({ createdAt: -1 });
+        if (products.length === 0) {
+            return res.status(404).json({ error: "Catégorie invalide ou aucun produit trouvé pour cette catégorie" });
+        }
+
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({
+            error: "Erreur lors de la récupération des produits par catégorie",
+        });
+    }
+};
+
 exports.getProduct = async (req, res) => {
     try {
         const id = req.params.id;

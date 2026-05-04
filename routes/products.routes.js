@@ -4,6 +4,7 @@ const authorizeRoles = require("../middleware/role");
 const upload = require("../middleware/multer");
 const {
     getProducts,
+    getProductsByCategory,
     getProduct,
     createProduct,
     updateProduct,
@@ -96,6 +97,44 @@ const router = express.Router();
  *         description: Erreur serveur
  */
 router.get("/", auth, authorizeRoles("admin"), getProducts);
+
+/**
+ * @swagger
+ * /wacdo/products/category/{category}:
+ *   get:
+ *     summary: Récupérer les produits par catégorie
+ *     description: Retourne la liste des produits correspondant à une catégorie donnée. Retourne une erreur si aucun produit n'est trouvé. Route réservée aux administrateurs.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: category
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [burger, side_dish, drink, dessert]
+ *         description: Catégorie du produit
+ *     responses:
+ *       200:
+ *         description: Liste des produits de la catégorie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       401:
+ *         description: Non authentifié
+ *       403:
+ *         description: Accès refusé
+ *       404:
+ *         description: Catégorie invalide ou aucun produit trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+router.get("/category/:category", auth, authorizeRoles("admin"), getProductsByCategory);
 
 /**
  * @swagger

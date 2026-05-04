@@ -4,6 +4,13 @@ const Menu = require("../models/menu.model");
 const User = require("../models/user.model");
 const mongoose = require("mongoose");
 
+const generateOrderNumber = () => {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const random = Math.floor(1000 + Math.random() * 9000);
+
+    return `CMD-${date}-${random}`;
+};
+
 exports.getOrders = async (req, res) => {
     let roleFilter = {};
 
@@ -130,6 +137,7 @@ exports.createOrder = async (req, res) => {
         }
 
         const order = new Order({
+            orderNumber: generateOrderNumber(),
             products,
             menus,
             user,

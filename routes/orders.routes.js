@@ -72,6 +72,8 @@ const router = express.Router();
  *       properties:
  *         _id:
  *           type: string
+ *         orderNumber:
+ *           type: string
  *         status:
  *           type: string
  *           enum: [awaiting_preparation, in_preparation, prepared, delivered]

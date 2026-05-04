@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
     {
+        orderNumber: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+
         status: {
             type: String,
             enum: ["awaiting_preparation", "in_preparation", "prepared", "delivered"],
