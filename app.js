@@ -30,6 +30,13 @@ app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "API Wacdo opérationnelle",
+        documentation: "/api-docs",
+    });
+});
+
 app.use("/wacdo/users", require("./routes/users.routes"));
 app.use("/wacdo/products", require("./routes/products.routes"));
 app.use("/wacdo/menus", require("./routes/menus.routes"));
